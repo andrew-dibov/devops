@@ -2,6 +2,7 @@
 
 .terraform*
 .env*
+.auth
 
 *.tfstate
 *.tfstate.*
