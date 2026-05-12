@@ -1,0 +1,7 @@
+---
+all:
+  hosts:
+  %{ for name, vm in instances ~}
+  ${trimspace(vm.labels.role)}:%{ if contains(["master-a", "master-b", "worker-a", "worker-b"], vm.labels.role) }
+      ansible_host: ${trimspace(name)}
+  %{ endif }%{ endfor ~}

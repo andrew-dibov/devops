@@ -1,0 +1,7 @@
+.auth
+
+/variables
+/inventory
+
+ansible.cfg
+ssh-config

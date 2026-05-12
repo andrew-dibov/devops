@@ -1,0 +1,96 @@
+---
+- name: "K8s : stage-b"
+  become: true
+  hosts: all
+
+  vars_files:
+    - "../group_vars/common.yml"
+
+  vars:
+    url_containerd: "https://github.com/containerd/containerd/releases/download/v{{ ver_containerd }}/containerd-{{ ver_containerd }}-linux-amd64.tar.gz"
+    url_containerd_service: "https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
+    url_runc: "https://github.com/opencontainers/runc/releases/download/v{{ ver_runc }}/runc.amd64"
+    url_plugins: "https://github.com/containernetworking/plugins/releases/download/v{{ ver_plugins }}/cni-plugins-linux-amd64-v{{ ver_plugins }}.tgz"
+
+  tasks:
+    - name: "K8s : stage-b : add temp dir"
+      ansible.builtin.tempfile:
+        suffix: stage-b-temp
+        state: directory
+      register: temp
+
+    - name: "K8s : stage-b : get containerd"
+      ansible.builtin.get_url:
+        url: "{{ url_containerd }}"
+        dest: "{{ temp.path }}/containerd-{{ ver_containerd }}-linux-amd64.tar.gz"
+
+    - name: "K8s : stage-b : extract containerd"
+      ansible.builtin.unarchive:
+        src: "{{ temp.path }}/containerd-{{ ver_containerd }}-linux-amd64.tar.gz"
+        dest: /usr/local
+        owner: root
+        group: root
+        creates: /usr/local/bin/containerd
+        remote_src: true
+
+    - name: "K8s : stage-b : add containerd service dir"
+      ansible.builtin.file:
+        path: /usr/local/lib/systemd/system
+        state: directory
+    
+    - name: "K8s : stage-b : get containerd systemd service"
+      ansible.builtin.get_url:
+        url: "{{ url_containerd_service }}"
+        dest: /usr/local/lib/systemd/system/containerd.service
+        mode: "0644"
+    
+    - name: "K8s : stage-b : add containerd config dir"
+      ansible.builtin.file:
+        path: /etc/containerd
+        state: directory
+
+    - name: "K8s : stage-b : add containerd config"
+      ansible.builtin.template:
+        src: templates/containerd-config.toml.j2
+        dest: /etc/containerd/config.toml
+        owner: root
+        group: root
+
+    - name: "K8s : stage-b : get runc"
+      ansible.builtin.get_url:
+        url: "{{ url_runc }}"
+        dest: "{{ temp.path }}/runc.amd64"
+    
+    - name: "K8s : stage-b : install runc"
+      ansible.builtin.copy:
+        src: "{{ temp.path }}/runc.amd64"
+        dest: /usr/local/sbin/runc
+        mode: '0755'
+        remote_src: true
+
+    - name: "K8s : stage-b : get plugins"
+      ansible.builtin.get_url:
+        url: "{{ url_plugins }}"
+        dest: "{{ temp.path }}/cni-plugins-linux-amd64-v{{ ver_plugins }}.tgz"
+
+    - name: "K8s : stage-b : add plugins dir"
+      ansible.builtin.file:
+        path: /opt/cni/bin
+        state: directory
+    
+    - name: "K8s : stage-b : install plugins"
+      ansible.builtin.unarchive:
+        src: "{{ temp.path }}/cni-plugins-linux-amd64-v{{ ver_plugins }}.tgz"
+        dest: /opt/cni/bin
+        remote_src: true
+
+    - name: "K8s : stage-b : enable containerd"
+      ansible.builtin.systemd:
+        name: containerd
+        state: started
+        enabled: true
+        daemon_reload: true
+
+    - name: "K8s : stage-b : remove temp dir"
+      ansible.builtin.file:
+        path: "{{ temp.path }}"

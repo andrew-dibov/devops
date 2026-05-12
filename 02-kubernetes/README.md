@@ -53,3 +53,7 @@ unset YC_TOKEN # убрать его раньше
 terraform init
 terraform apply
 ```
+
+```bash
+cd ansible
+```

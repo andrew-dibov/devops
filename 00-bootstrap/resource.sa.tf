@@ -26,6 +26,20 @@ resource "yandex_resourcemanager_folder_iam_member" "sa__compute_admin" {
   member = "serviceAccount:${yandex_iam_service_account.sa__terraform.id}"
 }
 
+resource "yandex_resourcemanager_folder_iam_member" "sa__load_balancer_admin" {
+  folder_id = data.yandex_client_config.cc__yandex_cloud.folder_id
+
+  role   = "load-balancer.admin"
+  member = "serviceAccount:${yandex_iam_service_account.sa__terraform.id}"
+}
+
+resource "yandex_resourcemanager_folder_iam_member" "sa__container_registries_admin" {
+  folder_id = data.yandex_client_config.cc__yandex_cloud.folder_id
+
+  role   = "container-registry.admin"
+  member = "serviceAccount:${yandex_iam_service_account.sa__terraform.id}"
+}
+
 # ---
 
 resource "yandex_iam_service_account_key" "sa__key_terraform" {

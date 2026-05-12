@@ -1,14 +1,14 @@
 Host bastion
   HostName ${bastion_ip}
   User ${bastion_user}
-  IdentityFile ${bastion_key}
+  IdentityFile ${bastion_identity_file}
   StrictHostKeyChecking accept-new
 
-%{ for name, cfg in instances ~}
+%{ for name, config in instances ~}
 Host ${name}
-  HostName ${cfg.hostname}
-  User ${cfg.user}
-  IdentityFile ${cfg.key}
+  HostName ${config.hostname}
+  User ${config.user}
+  IdentityFile ${config.identity_file}
   StrictHostKeyChecking accept-new
   ProxyJump bastion
 %{ endfor ~}

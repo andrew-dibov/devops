@@ -1,11 +1,11 @@
 resource "yandex_compute_instance" "ci__kubernetes" {
-  for_each = local.ci__configs
+  for_each = local.ci__kubernetes_configs
 
   zone        = each.value.zone
   platform_id = "standard-v3"
 
   name        = each.key
-  hostname    = each.value.hostname
+  hostname    = each.key
   description = each.value.description
 
   resources {
@@ -33,7 +33,7 @@ resource "yandex_compute_instance" "ci__kubernetes" {
 
   metadata = {
     ssh-keys  = "debian:${tls_private_key.tls__kubernetes[each.key].public_key_openssh}"
-    user-data = ""
+    user-data = templatefile("templates/cloud-init.common.tftpl", { pkgs = ["python3"] })
   }
 
   labels = {
@@ -41,43 +41,31 @@ resource "yandex_compute_instance" "ci__kubernetes" {
   }
 }
 
-# resource "yandex_compute_instance" "ci__bastion" {
-#   zone        = yandex_vpc_subnet.vpc__subnet_public_a.zone
-#   platform_id = "standard-v3"
+# ---
 
-#   name        = "ci--bastion"
-#   hostname    = "bastion"
-#   description = "CI Bastion"
+resource "local_file" "ansible_config" {
+  filename = "ansible/ansible.cfg"
+  content  = templatefile("templates/ansible.cfg.tftpl", {})
+}
 
-#   resources {
-#     cores         = 2
-#     memory        = 2
-#     core_fraction = 20
-#   }
+resource "local_file" "ansible_inventory" {
+  filename = "ansible/inventory/terraform.yml"
+  content = templatefile("templates/ansible.inventory.tftpl", {
+    instances = yandex_compute_instance.ci__kubernetes
+  })
+}
 
-#   boot_disk {
-#     initialize_params {
-#       image_id = data.yandex_compute_image.ci__debian.id
-#       size     = 10
-#     }
-#   }
+resource "local_file" "ansible_variables" {
+  filename = "ansible/variables/terraform.yml"
+  content = templatefile("templates/ansible.variables.tftpl", {
+    master_a = yandex_compute_instance.ci__kubernetes["${local.ci__kubernetes_names.ci__master_a}"].network_interface[0].ip_address
+    master_b = yandex_compute_instance.ci__kubernetes["${local.ci__kubernetes_names.ci__master_b}"].network_interface[0].ip_address
+    worker_a = yandex_compute_instance.ci__kubernetes["${local.ci__kubernetes_names.ci__worker_a}"].network_interface[0].ip_address
+    worker_b = yandex_compute_instance.ci__kubernetes["${local.ci__kubernetes_names.ci__worker_b}"].network_interface[0].ip_address
 
-#   network_interface {
-#     nat                = true
-#     subnet_id          = yandex_vpc_subnet.vpc__subnet_public_a.id
-#     security_group_ids = [yandex_vpc_security_group.sg__bastion.id]
-#   }
-
-#   scheduling_policy {
-#     preemptible = true
-#   }
-
-#   metadata = {
-#     ssh-keys  = "debian:${tls_private_key.tls__bastion_key.public_key_openssh}"
-#     user-data = templatefile("templates/bastion.ci.tftpl", { pkgs = [] })
-#   }
-
-#   labels = {
-#     role = "bastion"
-#   }
-# }
+    control_plane_endpoint = tolist([
+      for l in yandex_lb_network_load_balancer.lb__kubernetes_api.listener :
+      tolist(l.external_address_spec)[0].address
+    ])[0]
+  })
+}
