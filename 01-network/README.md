@@ -1,9 +1,4 @@
 ```bash
-cp ../bootstrap/terraform.auth.json terraform.auth.json
-cp ../bootstrap/.env .env
-```
-
-```bash
 cat > backend.s3.tf <<EOF
 terraform {
   backend "s3" {
@@ -22,12 +17,7 @@ terraform {
   }
 }
 EOF
-```
-
-```bash
-source .env
-unset YC_TOKEN
 
 terraform init
-terraform apply
+terraform apply -auto-approve
 ```

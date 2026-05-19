@@ -1,8 +1,10 @@
+# Compute Instance : Kubernetes
+
 resource "yandex_compute_instance" "ci__kubernetes" {
   for_each = local.ci__kubernetes_configs
 
   zone        = each.value.zone
-  platform_id = "standard-v3"
+  platform_id = var.ci__kubernetes_platform_id
 
   name        = each.key
   hostname    = each.key
@@ -33,7 +35,7 @@ resource "yandex_compute_instance" "ci__kubernetes" {
 
   metadata = {
     ssh-keys  = "debian:${tls_private_key.tls__kubernetes[each.key].public_key_openssh}"
-    user-data = templatefile("templates/cloud-init.common.tftpl", { pkgs = ["python3"] })
+    user-data = templatefile("${var.templates_dir}/cloud-init.common.tftpl", { pkgs = ["python3"] })
   }
 
   labels = {
@@ -41,23 +43,27 @@ resource "yandex_compute_instance" "ci__kubernetes" {
   }
 }
 
-# ---
+# Local File : Ansible Config
 
-resource "local_file" "ansible_config" {
-  filename = "ansible/ansible.cfg"
-  content  = templatefile("templates/ansible.cfg.tftpl", {})
+resource "local_file" "lf__ansible_config" {
+  filename = var.lf__ansible_config_filename
+  content  = templatefile("${var.templates_dir}/ansible.cfg.tftpl", {})
 }
 
-resource "local_file" "ansible_inventory" {
-  filename = "ansible/inventory/terraform.yml"
-  content = templatefile("templates/ansible.inventory.tftpl", {
+# Local File : Ansible Inventory
+
+resource "local_file" "lf__ansible_inventory" {
+  filename = var.lf__ansible_inventory_filename
+  content = templatefile("${var.templates_dir}/ansible.inventory.tftpl", {
     instances = yandex_compute_instance.ci__kubernetes
   })
 }
 
-resource "local_file" "ansible_variables" {
-  filename = "ansible/variables/terraform.yml"
-  content = templatefile("templates/ansible.variables.tftpl", {
+# Local File : Ansible Variables
+
+resource "local_file" "lf__ansible_variables" {
+  filename = var.lf__ansible_variables_filename
+  content = templatefile("${var.templates_dir}/ansible.variables.tftpl", {
     master_a = yandex_compute_instance.ci__kubernetes["${local.ci__kubernetes_names.ci__master_a}"].network_interface[0].ip_address
     master_b = yandex_compute_instance.ci__kubernetes["${local.ci__kubernetes_names.ci__master_b}"].network_interface[0].ip_address
     worker_a = yandex_compute_instance.ci__kubernetes["${local.ci__kubernetes_names.ci__worker_a}"].network_interface[0].ip_address

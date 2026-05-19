@@ -1,3 +1,3 @@
 data "yandex_compute_image" "ci__debian" {
-  family = "debian-12"
+  family = var.ci__debian_family
 }

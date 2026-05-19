@@ -1,10 +1,12 @@
+# Compute Instance : Bastion
+
 resource "yandex_compute_instance" "ci__bastion" {
   zone        = yandex_vpc_subnet.vpc__subnet_public_a.zone
-  platform_id = "standard-v3"
+  platform_id = var.ci__bastion_platform_id
 
-  name        = "ci--bastion"
-  hostname    = "bastion"
-  description = "CI Bastion"
+  name        = var.ci__bastion_name
+  hostname    = var.ci__bastion_hostname
+  description = var.ci__bastion_description
 
   resources {
     cores         = 2
@@ -31,10 +33,10 @@ resource "yandex_compute_instance" "ci__bastion" {
 
   metadata = {
     ssh-keys  = "debian:${tls_private_key.tls__bastion_key.public_key_openssh}"
-    user-data = templatefile("templates/bastion.ci.tftpl", { pkgs = [] })
+    user-data = templatefile("${var.templates_dir}/bastion.ci.tftpl", { pkgs = [] })
   }
 
   labels = {
-    role = "bastion"
+    role = var.ci__bastion_role
   }
 }

@@ -1,31 +1,25 @@
 # Stage A
 
+https://yandex.cloud/en/docs/iam/concepts/authorization/oauth-token
+
 ```bash
-# https://yandex.cloud/en/docs/iam/concepts/authorization/oauth-token
-
-echo "export YC_TOKEN=" > .env # положить руками в файл (не светить в истории)
-echo "export YC_CLOUD_ID=$(yc config get cloud-id)" >> .env
-echo "export YC_FOLDER_ID=$(yc config get folder-id)" >> .env
-
+echo "export YC_TOKEN=" > .env # положить руками (не светить в терминале)
 source .env
-```
 
-```bash
+export YC_CLOUD_ID=$(yc config get cloud-id)
+export YC_FOLDER_ID=$(yc config get folder-id)
+
 terraform init
-terraform apply
+terraform apply -auto-approve
 ```
 
 # Stage B
 
 ```bash
-echo "export AWS_ACCESS_KEY_ID=$(terraform output -raw os__tfstate_access_key)" >> .env
-echo "export AWS_SECRET_ACCESS_KEY=$(terraform output -raw os__tfstate_secret_key)" >> .env
+export AWS_ACCESS_KEY_ID=$(yc lockbox payload get --name ls--tfstate-keys --format json | jq -r '.entries[] | select(.key=="access_key") | .text_value')
+export AWS_SECRET_ACCESS_KEY=$(yc lockbox payload get --name ls--tfstate-keys --format json | jq -r '.entries[] | select(.key=="secret_key") | .text_value')
 
-source .env
-```
-
-```bash
-export BUCKET=$(terraform output -raw os__tfstate_bucket)
+export BUCKET=$(terraform output -raw sb__tfstate)
 
 cat > backend.s3.tf <<EOF
 terraform {
@@ -45,9 +39,12 @@ terraform {
   }
 }
 EOF
-```
 
-```bash
 terraform init -reconfigure
 rm *tfstate*
+
+cp terraform.auth.json ../01-network
+cp terraform.auth.json ../02-kubernetes
+
+unset YC_TOKEN
 ```

@@ -1,8 +1,4 @@
 ```bash
-cp ../bootstrap/terraform.auth.json terraform.auth.json
-cp ../bootstrap/.env .env
-```
-```bash
 cat > backend.s3.tf <<EOF
 terraform {
   backend "s3" {
@@ -21,11 +17,9 @@ terraform {
   }
 }
 EOF
-```
 
-```bash
 cat > data.vpc.tf <<EOF
-data "terraform_remote_state" "vpc" {
+data "terraform_remote_state" "network" {
   backend = "s3"
   config = {
     bucket   = "$BUCKET"
@@ -43,17 +37,7 @@ data "terraform_remote_state" "vpc" {
   }
 }
 EOF
-```
-
-
-```bash
-source .env
-unset YC_TOKEN # убрать его раньше
 
 terraform init
-terraform apply
-```
-
-```bash
-cd ansible
+terraform apply -auto-approve
 ```

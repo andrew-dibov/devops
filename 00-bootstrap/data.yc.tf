@@ -1,1 +1,1 @@
-data "yandex_client_config" "cc__yandex_cloud" {}
+data "yandex_client_config" "cc__yandex" {}

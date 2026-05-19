@@ -1,13 +1,6 @@
 ```bash
-ansible-playbook -i inventory/terraform.yml playbooks/kubernetes-stage-0*
-```
+ansible-playbook -i inventory/terraform.yml playbooks/kubernetes-0*
+ansible-playbook -i inventory/terraform.yml playbooks/kubernetes-helm.yml
 
-
-
-
-```bash
-export KUBECONFIG=~/.kube/config:$(pwd)/playbooks/admin.conf
-
-kubectl config get-contexts
-kubectl config use-context kubernetes-admin@kubernetes
+kubectl port-forward -n monitoring svc/kube-prometheus-stack-grafana 8080:80
 ```

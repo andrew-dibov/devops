@@ -1,6 +1,10 @@
-ver_containerd: "2.1.4"
-ver_runc: "1.3.0"
-ver_plugins: "1.8.0"
-ver_kubernetes: "1.34"
+containerd_version: "2.1.4"
+runc_version: "1.3.0"
+cni_plugins_version: "1.8.0"
+kubernetes_version: "1.34.0"
 
-networking__pod_subnet: "10.244.0.0/16"
+ingress_version: "4.9.0"
+prometheus_version: "56.18.0"
+
+pod_subnet: "10.244.0.0/16"
+kubeconfig_local: ~/.kube/config

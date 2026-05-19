@@ -7,7 +7,7 @@ locals {
   }
   ci__kubernetes_configs = {
     (local.ci__kubernetes_names.ci__master_a) = {
-      zone = "ru-central1-a"
+      zone        = "ru-central1-a"
       description = "CI Kubernetes Master A"
 
       resources = {
@@ -23,7 +23,7 @@ locals {
       network_interface = {
         subnet_id          = data.terraform_remote_state.network.outputs.vpc__subnet_private_a_id
         nat                = false
-        security_group_ids = []
+        security_group_ids = [yandex_vpc_security_group.sg__kubernetes.id]
       }
 
       scheduling_policy = {
@@ -33,12 +33,12 @@ locals {
       role = "master-a"
     }
     (local.ci__kubernetes_names.ci__master_b) = {
-      zone = "ru-central1-b"
+      zone        = "ru-central1-b"
       description = "CI Kubernetes Master B"
 
       resources = {
-        cores = 4
-        memory = 4
+        cores         = 4
+        memory        = 4
         core_fraction = 20
       }
 
@@ -47,9 +47,9 @@ locals {
       }
 
       network_interface = {
-        subnet_id = data.terraform_remote_state.network.outputs.vpc__subnet_private_b_id
-        nat = false
-        security_group_ids = []
+        subnet_id          = data.terraform_remote_state.network.outputs.vpc__subnet_private_b_id
+        nat                = false
+        security_group_ids = [yandex_vpc_security_group.sg__kubernetes.id]
       }
 
       scheduling_policy = {
@@ -59,12 +59,12 @@ locals {
       role = "master-b"
     }
     (local.ci__kubernetes_names.ci__worker_a) = {
-      zone = "ru-central1-a"
+      zone        = "ru-central1-a"
       description = "CI Kubernetes Worker A"
 
       resources = {
-        cores = 4
-        memory = 4
+        cores         = 4
+        memory        = 4
         core_fraction = 20
       }
 
@@ -73,9 +73,9 @@ locals {
       }
 
       network_interface = {
-        subnet_id = data.terraform_remote_state.network.outputs.vpc__subnet_private_a_id
-        nat = false
-        security_group_ids = []
+        subnet_id          = data.terraform_remote_state.network.outputs.vpc__subnet_private_a_id
+        nat                = false
+        security_group_ids = [yandex_vpc_security_group.sg__kubernetes.id]
       }
 
       scheduling_policy = {
@@ -85,12 +85,12 @@ locals {
       role = "worker-a"
     }
     (local.ci__kubernetes_names.ci__worker_b) = {
-      zone = "ru-central1-b"
+      zone        = "ru-central1-b"
       description = "CI Kubernetes Worker B"
 
       resources = {
-        cores = 4
-        memory = 4
+        cores         = 4
+        memory        = 4
         core_fraction = 20
       }
 
@@ -99,9 +99,9 @@ locals {
       }
 
       network_interface = {
-        subnet_id = data.terraform_remote_state.network.outputs.vpc__subnet_private_b_id
-        nat = false
-        security_group_ids = []
+        subnet_id          = data.terraform_remote_state.network.outputs.vpc__subnet_private_b_id
+        nat                = false
+        security_group_ids = [yandex_vpc_security_group.sg__kubernetes.id]
       }
 
       scheduling_policy = {

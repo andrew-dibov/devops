@@ -1,0 +1,77 @@
+---
+- name: "K8s : install kubernetes"
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars_files: "../group_vars/common.yml"
+
+  vars:
+    key: kubernetes-release.key
+    key_url: https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version }}/deb/Release.key
+
+    packages:
+      - kubelet
+      - kubeadm
+      - kubectl
+
+  tasks:
+    - name: "K8s : install kubernetes : ensure keyrings dir"
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: 0755
+
+    - name: "K8s : install kubernetes : create temp dir"
+      ansible.builtin.tempfile:
+        suffix: temp-
+        state: directory
+      register: temp
+
+    - name: "K8s : install kubernetes : get key"
+      ansible.builtin.get_url:
+        url: "{{ key_url }}"
+        dest: "{{ temp.path }}/{{ key }}"
+        owner: root
+        group: root
+        mode: 0644
+        force: false
+    
+    - block:
+      - name: "K8s : install kubernetes : dearmor key"
+        ansible.builtin.shell:
+          cmd: gpg --dearmor --yes -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg < {{ temp.path }}/{{ key }}
+          creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      
+      - name: "K8s : install kubernetes : add key"
+        ansible.builtin.apt_repository:
+          filename: kubernetes
+          state: present
+          repo: >-
+            deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg]
+            https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version }}/deb/ /
+      
+      always:
+        - name: "K8s : install kubernetes : remove key"
+          ansible.builtin.file:
+            path: "{{ temp.path }}/{{ key }}"
+            state: absent
+          changed_when: false
+        
+        - name: "K8s : install kubernetes : remove temp dir"
+          ansible.builtin.file:
+            path: "{{ temp.path }}"
+            state: absent
+          changed_when: false
+            
+    - name: "K8s : install kubernetes : install packages"
+      ansible.builtin.apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: true
+    
+    - name: "K8s : install kubernetes : hold packages"
+      ansible.builtin.dpkg_selections:
+        name: "{{ item }}"
+        selection: hold
+      loop: "{{ packages }}"

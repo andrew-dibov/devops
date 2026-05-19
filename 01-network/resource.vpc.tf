@@ -1,57 +1,61 @@
+# Virtual Private Cloud : Network
+
 resource "yandex_vpc_network" "vpc__network" {
-  name        = "vpc--network"
-  description = "VPC Network"
+  name        = var.vpc__network_name
+  description = var.vpc__network_description
 }
+
+# Virtual Private Cloud : Subnet
 
 resource "yandex_vpc_subnet" "vpc__subnet_public_a" {
   network_id = yandex_vpc_network.vpc__network.id
 
-  name        = "vpc--subnet-public-a"
-  description = "VPC Subnet Public A"
+  name        = var.vpc__subnet_public_a_name
+  description = var.vpc__subnet_public_a_description
 
-  zone           = "ru-central1-a"
-  v4_cidr_blocks = ["10.0.1.0/24"]
+  zone           = var.vpc__subnet_public_a_zone
+  v4_cidr_blocks = var.vpc__subnet_public_a_cidr
 }
 
 resource "yandex_vpc_subnet" "vpc__subnet_public_b" {
   network_id = yandex_vpc_network.vpc__network.id
 
-  name        = "vpc--subnet-public-b"
-  description = "VPC Subnet Public B"
+  name        = var.vpc__subnet_public_b_name
+  description = var.vpc__subnet_public_b_description
 
-  zone           = "ru-central1-b"
-  v4_cidr_blocks = ["10.0.2.0/24"]
+  zone           = var.vpc__subnet_public_b_zone
+  v4_cidr_blocks = var.vpc__subnet_public_b_cidr
 }
 
 resource "yandex_vpc_subnet" "vpc__subnet_private_a" {
   network_id     = yandex_vpc_network.vpc__network.id
   route_table_id = yandex_vpc_route_table.vpc__route_table.id
 
-  name        = "vpc--subnet-private-a"
-  description = "VPC Subnet Private A"
+  name        = var.vpc__subnet_private_a_name
+  description = var.vpc__subnet_private_a_description
 
-  zone           = "ru-central1-a"
-  v4_cidr_blocks = ["10.1.1.0/24"]
+  zone           = var.vpc__subnet_private_a_zone
+  v4_cidr_blocks = var.vpc__subnet_private_a_cidr
 }
 
 resource "yandex_vpc_subnet" "vpc__subnet_private_b" {
   network_id     = yandex_vpc_network.vpc__network.id
   route_table_id = yandex_vpc_route_table.vpc__route_table.id
 
-  name        = "vpc--subnet-private-b"
-  description = "VPC Subnet Private B"
+  name        = var.vpc__subnet_private_b_name
+  description = var.vpc__subnet_private_b_description
 
-  zone           = "ru-central1-b"
-  v4_cidr_blocks = ["10.1.2.0/24"]
+  zone           = var.vpc__subnet_private_b_zone
+  v4_cidr_blocks = var.vpc__subnet_private_b_cidr
 }
 
-# ---
+# Virtual Private Cloud : Route Table
 
 resource "yandex_vpc_route_table" "vpc__route_table" {
   network_id = yandex_vpc_network.vpc__network.id
 
-  name        = "vpc--route-table"
-  description = "VPC Route Table"
+  name        = var.vpc__route_table_name
+  description = var.vpc__route_table_description
 
   static_route {
     destination_prefix = "0.0.0.0/0"
@@ -59,20 +63,22 @@ resource "yandex_vpc_route_table" "vpc__route_table" {
   }
 }
 
+# Virtual Private Cloud : Gateway
+
 resource "yandex_vpc_gateway" "vpc__gateway" {
-  name        = "vpc--gateway"
-  description = "VPC Gateway"
+  name        = var.vpc__gateway_name
+  description = var.vpc__gateway_description
 
   shared_egress_gateway {}
 }
 
-# ---
+# Virtual Private Cloud : Security Group : Bastion
 
 resource "yandex_vpc_security_group" "sg__bastion" {
   network_id = yandex_vpc_network.vpc__network.id
 
-  name        = "sg--bastion"
-  description = "SG Bastion"
+  name        = var.sg__bastion_name
+  description = var.sg__bastion_description
 
   ingress {
     protocol       = "TCP"
@@ -83,7 +89,7 @@ resource "yandex_vpc_security_group" "sg__bastion" {
 
   egress {
     protocol       = "TCP"
-    description    = "SSH to Private"
+    description    = "SSH"
     v4_cidr_blocks = ["10.0.0.0/12"]
     port           = 22
   }
