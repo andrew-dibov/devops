@@ -12,14 +12,6 @@
 | **Application** | Flask-приложение с метриками, CI/CD на GitHub Actions | [devops-application](https://github.com/andrew-dibov/devops-application) |
 | **Manifests** | GitOps манифесты Deployment, Service, Ingress, ServiceMonitor, применение через GitHub Actions | [devops-manifests](https://github.com/andrew-dibov/devops-manifests) |
 
-## Зависимости и порядок развертывания
-
-1. **Bootstrap** : создает базовую инфраструктуру
-2. **Network** : опирается на Bootstrap и разворачивает сеть с бастионом
-3. **Kubernetes** : использует сеть для развертывания кластера
-4. **Application** : выполняет CI/CD в кластере
-5. **Manifests** : полагается на образ приложения и кластер для GitOps
-
 ## Технологический стек
 
 - **IaC** : Terraform, Yandex Cloud
@@ -29,6 +21,14 @@
 - **CI/CD** : GitHub Actions
 - **Observability** : Prometheus, Grafana, Alertmanager
 - **GitOps** : Atlantis
+
+## Зависимости и порядок развертывания
+
+1. **Bootstrap** : создает базовую инфраструктуру
+2. **Network** : опирается на Bootstrap и разворачивает сеть с бастионом
+3. **Kubernetes** : использует сеть для развертывания кластера
+4. **Application** : выполняет CI/CD в кластере
+5. **Manifests** : полагается на образ приложения и кластер для GitOps
 
 ## Запуск
 
