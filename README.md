@@ -1,35 +1,31 @@
-# DevOps инфраструктура
+# DevOps
 
-Комплекс из пяти взаимосвязанных проектов, демонитрирующий полный цикл создания облачной инфраструктуры, развертывания Kubernetes, настройки CI/CD и реализации GitOps.
+Комплекс взаимосвязанных проектов, демонстрирующий полный цикл создания облачной инфраструктуры с нуля до развертывания Kubernetes, настройки CI/CD и GitOps.
 
-## Состав
+## Проекты
 
-| Проект | Назначение | Ссылка |
-| :-- | :-- | :-- |
-| **Bootstrap** | Создание сервисного аккаунта, бакета для State, Container Registry, Lockbox и миграция бэкенда Terraform | [devops-bootstrap](https://github.com/andrew-dibov/devops-bootstrap) |
-| **Network** | VPC с публичными/приватными подсетями, NAT-шлюз, бастион и группы безопасности | [devops-network](https://github.com/andrew-dibov/devops-network) |
-| **Kubernetes** | HA-кластер, установка Ingress NGINX, Prometheus Stack и Atlantis | [devops-kubernetes](https://github.com/andrew-dibov/devops-kubernetes) |
-| **Application** | Flask-приложение с метриками, CI/CD на GitHub Actions | [devops-application](https://github.com/andrew-dibov/devops-application) |
-| **Manifests** | GitOps манифесты Deployment, Service, Ingress, ServiceMonitor, применение через GitHub Actions | [devops-manifests](https://github.com/andrew-dibov/devops-manifests) |
+| # | Проект | Назначение |
+| :-: | :-- | :-- |
+| 1 | **[Bootstrap](https://github.com/andrew-dibov/devops-bootstrap)** | Создание сервисного аккаунта Terraform, бакета для удаленного хранения состояния, реестра контейнеров, хранилища секретов и автоматическая миграция бэкенда |
+| 2 | **[Network](https://github.com/andrew-dibov/devops-network)** | Создание виртуальной сети с публичными и приватными подсетями, NAT-шлюза с таблицей маршрутизации, бастион-хоста и соответствующей ему группы безопасности |
+| 3 | **[Kubernetes](https://github.com/andrew-dibov/devops-kubernetes)** | Развертывание high availability Kubernetes кластера из четырех хостов в разных подсетях и зонах доступности, деплой Ingress NGINX, Prometheus Stack и Atlantis |
+| 4 | **[Application](https://github.com/andrew-dibov/devops-application)** | Автоматическая сборка и отправка в реестр контейнеров Flask-приложения с реализацией CI/CD-пайплайнов на GitHub Actions |
+| 5 | **[Manifests](https://github.com/andrew-dibov/devops-manifests)** | Использование GitHub Actions для применения Kubernetes-манифестов : Deployment, Service, ServiceMonitor, Ingress |
 
-## Технологический стек
+## Технологии
 
-- **IaC** : Terraform, Yandex Cloud
-- **Config Management** : Ansible, Bash
-- **Коннейнеризация** : Docker, Container Registry
-- **Оркестрация** : Kubernetes, Flannel
+- **Infrastructure as Code, IaC** : Terraform, Yandex Cloud
+- **Automation & Scripting** : Bash, Ansible
+- **Containerization** : Docker
+- **Orchestration** : Kubernetes, Flannel
 - **CI/CD** : GitHub Actions
-- **Observability** : Prometheus, Grafana, Alertmanager
+- **Observability** : Prometheus, Grafana, Alertmanager, Flask Exporter
 - **GitOps** : Atlantis
 
-## Зависимости и порядок развертывания
+## Развертывание
 
-1. **Bootstrap** : создает базовую инфраструктуру
-2. **Network** : опирается на Bootstrap и разворачивает сеть с бастионом
-3. **Kubernetes** : использует сеть для развертывания кластера
-4. **Application** : выполняет CI/CD в кластере
-5. **Manifests** : полагается на образ приложения и кластер для GitOps
+Проекты развертываются последовательно, потому что каждый следующий этап является надстройкой над предыдущим. Подробное описание каждого проекта и способ его развертывания находятся в `README.md` репозиториев. Как правило, развертывание выполняется одной командой :
 
-## Запуск
-
-Каждый проект содержит `README.md` с подробной инструкцией по развертыванию. Как правило, развертывание происходит командой, запускающей Bash-скрипт.
+```bash
+sudo chmod +x bash/* && ./bash/init.sh
+```
